@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: karpenter-app
+  name: karpenter-components
 spec:
   project: cluster-addons
   destination:
@@ -14,8 +14,4 @@ spec:
   source:
     repoURL: https://github.com/karnzx/EKS-GitOps-CICD.git
     targetRevision: HEAD
-    path: gitops/apps/addons/karpenter/helm
-    helm:
-      releaseName: karpenter
-      valueFiles:
-        - values.yaml
+    path: gitops/apps/addons/karpenter/components
