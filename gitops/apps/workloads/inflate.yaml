@@ -10,9 +10,7 @@ spec:
     server: https://kubernetes.default.svc
     namespace: default
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+    automated: {}
   source:
     repoURL: https://github.com/karnzx/EKS-GitOps-CICD.git
     targetRevision: HEAD
