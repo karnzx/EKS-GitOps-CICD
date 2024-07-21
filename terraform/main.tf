@@ -219,6 +219,29 @@ module "access_s3_irsa" {
   })
 }
 
+module "aws_lb_controller_pod_identity" {
+  source  = "terraform-aws-modules/eks-pod-identity/aws"
+  version = "1.3.0"
+
+  name = "aws-lbc"
+
+  attach_aws_lb_controller_policy = true
+  association_defaults = {
+    namespace       = "kube-system"
+    service_account = "aws-load-balancer-controller"
+  }
+
+  associations = {
+    projectu = {
+      cluster_name = module.eks.cluster_name
+    }
+  }
+
+  tags = merge(local.tags, {
+    Module = "aws_lb_controller_pod_identity"
+  })
+}
+
 module "ebs_csi_driver_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "5.41.0"
