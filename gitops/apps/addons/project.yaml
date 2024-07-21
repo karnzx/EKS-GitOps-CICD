@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: cluster-addons
+spec:
+  description: Cluster Addons Projects
+  sourceRepos:
+    - '*'
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  namespaceResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  destinations:
+    - namespace: 'kube-system'
+      server: https://kubernetes.default.svc

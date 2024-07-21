@@ -1,0 +1,4 @@
+settings:
+  clusterName: ProjectU
+serviceAccount:
+  name: karpenter

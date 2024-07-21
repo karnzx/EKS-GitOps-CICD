@@ -1,0 +1,35 @@
+applicationsets:
+  cluster:
+    namespace: argocd
+    generators:
+    - git:
+        repoURL: https://github.com/karnzx/EKS-GitOps-CICD.git
+        revision: HEAD
+        directories:
+        - path: app/workloads
+        - path: app/addons
+    # Ref https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Controlling-Resource-Modification/#allow-temporarily-toggling-auto-sync
+    ignoreApplicationDifferences:
+    - jsonPointers:
+      - /spec/syncPolicy
+    template:
+      metadata:
+        name: 'cluster-{{path.basename}}'
+        labels:
+          project: 'cluster-{{path.basename}}'
+        annotations: {}
+      spec:
+        project: default
+        source:
+          repoURL: https://github.com/karnzx/EKS-GitOps-CICD.git
+          targetRevision: HEAD
+          path: '{{path}}'
+          directory:
+            recurse: true
+        destination:
+          server: https://kubernetes.default.svc
+          namespace: default
+        syncPolicy:
+          automated:
+            prune: false
+            selfHeal: false
