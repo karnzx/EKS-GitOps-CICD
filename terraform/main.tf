@@ -142,6 +142,7 @@ module "karpenter" {
 
   enable_pod_identity             = true
   create_pod_identity_association = true
+  node_iam_role_use_name_prefix   = false
 
   tags = merge(local.tags, {
     Module = "karpenter"
