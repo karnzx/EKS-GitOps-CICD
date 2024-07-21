@@ -242,23 +242,28 @@ module "aws_lb_controller_pod_identity" {
   })
 }
 
-module "ebs_csi_driver_irsa" {
-  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-  version = "5.41.0"
+module "ebs_csi_driver_pod_identity" {
+  source  = "terraform-aws-modules/eks-pod-identity/aws"
+  version = "1.3.0"
 
-  role_name_prefix = "${module.eks.cluster_name}-ebs-csi-driver-"
+  name = "aws-ebs-csi"
 
-  attach_ebs_csi_policy = true
+  attach_aws_ebs_csi_policy = true
 
-  oidc_providers = {
-    main = {
-      provider_arn               = module.eks.oidc_provider_arn
-      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+  # Pod Identity Associations
+  association_defaults = {
+    namespace       = "kube-system"
+    service_account = "ebs-csi-controller"
+  }
+
+  associations = {
+    projectu = {
+      cluster_name = module.eks.cluster_name
     }
   }
 
   tags = merge(local.tags, {
-    Module = "ebs_csi_driver_irsa"
+    Module = "ebs_csi_driver_pod_identity"
   })
 }
 
