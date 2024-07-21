@@ -12,12 +12,10 @@ spec:
       prune: true
       selfHeal: true
   source:
-    chart: karpenter
-    repoURL: oci://public.ecr.aws/karpenter/karpenter
-    targetRevision: 0.37.0
+    repoURL: https://github.com/karnzx/EKS-GitOps-CICD.git
+    targetRevision: HEAD
+    path: gitops/apps/addons/karpenter/helm
     helm:
-      valuesObject:
-        settings:
-          clusterName: ProjectU
-        serviceAccount:
-          name: karpenter
+      releaseName: karpenter
+      valueFiles:
+        - values.yaml
