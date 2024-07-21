@@ -108,9 +108,9 @@ module "eks" {
   }
 
   eks_managed_node_groups = {
-    karpenter = {
+    nodeA = {
       ami_type       = "AL2023_x86_64_STANDARD"
-      instance_types = ["t3a.micro"]
+      instance_types = ["t3a.medium"]
 
       min_size     = 3
       max_size     = 4
