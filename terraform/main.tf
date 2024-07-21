@@ -105,6 +105,7 @@ module "eks" {
     kube-proxy             = {}
     vpc-cni                = {}
     eks-pod-identity-agent = {}
+    aws-ebs-csi-driver     = {}
   }
 
   eks_managed_node_groups = {
@@ -253,7 +254,7 @@ module "ebs_csi_driver_pod_identity" {
   # Pod Identity Associations
   association_defaults = {
     namespace       = "kube-system"
-    service_account = "ebs-csi-controller"
+    service_account = "ebs-csi-controller-sa"
   }
 
   associations = {
