@@ -55,8 +55,9 @@ module "vpc_endpoints" {
   source  = "terraform-aws-modules/vpc/aws//modules/vpc-endpoints"
   version = "5.9.0"
 
-  vpc_id                = module.vpc.vpc_id
-  create_security_group = true
+  vpc_id                     = module.vpc.vpc_id
+  create_security_group      = true
+  security_group_name_prefix = "${local.name}-vpc-endpoints-"
   # to ensure that the AWS CLI can send HTTPS requests to the AWS service
   security_group_rules = {
     ingress_https = {
@@ -68,8 +69,13 @@ module "vpc_endpoints" {
 
   endpoints = {
     s3 = {
-      service = "s3"
-      tags    = { Name = "s3-vpc-endpoint" }
+      service             = "s3"
+      private_dns_enabled = true
+      dns_options = {
+        private_dns_only_for_inbound_resolver_endpoint = false
+      }
+      subnet_ids = module.vpc.private_subnets
+      tags       = { Name = "s3-vpc-endpoint" }
     }
   }
 
