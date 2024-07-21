@@ -8,12 +8,12 @@ spec:
   role: karpenter-karpenter
   subnetSelectorTerms:
     - tags:
-        karpenter.sh/discovery: karpenter
+        karpenter.sh/discovery: ProjectU
   securityGroupSelectorTerms:
     - tags:
-        karpenter.sh/discovery: karpenter
+        karpenter.sh/discovery: ProjectU
   tags:
-    karpenter.sh/discovery: karpenter
+    karpenter.sh/discovery: ProjectU
 ---
 apiVersion: karpenter.sh/v1beta1
 kind: NodePool
