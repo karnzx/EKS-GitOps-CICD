@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: inflate
 spec:
-  replicas: 30
+  replicas: 3
   selector:
     matchLabels:
       app: inflate
