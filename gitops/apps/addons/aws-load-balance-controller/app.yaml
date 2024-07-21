@@ -4,13 +4,6 @@ metadata:
   name: aws-load-balancer-controller
 spec:
   project: cluster-addons
-  source:
-    chart: aws-load-balancer-controller
-    repoURL: https://aws.github.io/eks-charts
-    targetRevision: 1.8.1
-    helm:
-      valueFiles:
-        - values.yaml
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: kube-system
@@ -18,3 +11,10 @@ spec:
     automated:
       prune: true
       selfHeal: true
+  source:
+    chart: aws-load-balancer-controller
+    repoURL: https://aws.github.io/eks-charts
+    targetRevision: 1.8.1
+    helm:
+      valuesObject:
+        clusterName: ProjectU

@@ -4,13 +4,6 @@ metadata:
   name: karpenter
 spec:
   project: cluster-addons
-  source:
-    chart: karpenter
-    repoURL: oci://public.ecr.aws/karpenter/karpenter
-    targetRevision: 0.37.0
-    helm:
-      valueFiles:
-      - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
@@ -18,3 +11,13 @@ spec:
     automated:
       prune: true
       selfHeal: true
+  source:
+    chart: karpenter
+    repoURL: oci://public.ecr.aws/karpenter/karpenter
+    targetRevision: 0.37.0
+    helm:
+      valuesObject:
+        settings:
+          clusterName: ProjectU
+        serviceAccount:
+          name: karpenter
