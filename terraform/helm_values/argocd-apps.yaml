@@ -6,8 +6,8 @@ applicationsets:
         repoURL: https://github.com/karnzx/EKS-GitOps-CICD.git
         revision: HEAD
         directories:
-        - path: app/workloads
-        - path: app/addons
+        - path: gitops/app/workloads
+        - path: gitops/app/addons
     # Ref https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Controlling-Resource-Modification/#allow-temporarily-toggling-auto-sync
     ignoreApplicationDifferences:
     - jsonPointers:
