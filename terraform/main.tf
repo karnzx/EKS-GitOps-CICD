@@ -316,14 +316,28 @@ module "rds_security_group" {
 ## Helm 
 # bootstrap with Gitops
 
-# resource "helm_release" "argocd" {
-#   namespace        = "argocd"
-#   name             = "argocd"
-#   create_namespace = true
-#   repository       = "https://argoproj.github.io/argo-helm"
-#   chart            = "argo-cd"
-#   version          = "7.1.2" # app v2.11.3
-#   wait             = false
+resource "helm_release" "argocd" {
+  name             = "argocd"
+  namespace        = "argocd"
+  create_namespace = true
+  repository       = "https://argoproj.github.io/argo-helm"
+  chart            = "argo-cd"
+  version          = "7.1.2" # app v2.11.3
+  wait             = false
+  values           = [templatefile("${path.module}/helm_values/argocd.yaml", {})]
 
-#   # values = [templatefile("${path.module}/helm_values/argocd-apps.yaml", {})]
-# }
+  depends_on = [module.eks]
+}
+
+resource "helm_release" "argocd_apps" {
+  name             = "argocd-apps"
+  namespace        = "argocd"
+  create_namespace = false
+  repository       = "https://argoproj.github.io/argo-helm"
+  chart            = "argocd-apps"
+  version          = "2.0.0"
+  wait             = false
+  values           = [templatefile("${path.module}/helm_values/argocd-apps.yaml", {})]
+
+  depends_on = [helm_release.argocd]
+}
