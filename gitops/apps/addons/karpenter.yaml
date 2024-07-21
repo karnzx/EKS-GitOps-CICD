@@ -11,7 +11,7 @@ spec:
     namespace: argocd
   syncPolicy:
     automated:
-      prune: true
+      prune: false
       selfHeal: true
   source:
     repoURL: https://github.com/karnzx/EKS-GitOps-CICD.git

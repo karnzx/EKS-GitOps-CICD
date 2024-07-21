@@ -11,7 +11,7 @@ spec:
     namespace: kube-system
   syncPolicy:
     automated:
-      prune: true
+      prune: false
       selfHeal: true
   source:
     chart: aws-load-balancer-controller
