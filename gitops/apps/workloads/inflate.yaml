@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: inflate
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: cluster-addons
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+  source:
+    repoURL: https://github.com/karnzx/EKS-GitOps-CICD.git
+    targetRevision: HEAD
+    path: gitops/apps/workloads/inflate
