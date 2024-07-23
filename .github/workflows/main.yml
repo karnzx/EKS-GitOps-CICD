@@ -114,4 +114,5 @@ jobs:
           git config --global user.name "karnzx"
           git config --global user.email "karnzx.noreply.github.com"
           git commit -am "[skip ci] feat: Update deployment image tag to ${NEW_IMAGE_TAG}"
+          git pull --rebase origin main
           git push origin HEAD:main
