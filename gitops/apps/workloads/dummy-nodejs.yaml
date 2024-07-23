@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dummy-nodejs
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dummy-nodejs
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true
+  source:
+    repoURL: https://github.com/karnzx/EKS-GitOps-CICD.git
+    targetRevision: HEAD
+    path: gitops/apps/workloads/dummy-nodejs
