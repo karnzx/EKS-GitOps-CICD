@@ -6,3 +6,6 @@ resources:
 - service.yaml
 images:
 - name: /a9i2u6l7/dummy-nodejs
+- name: public.ecr.aws/a9i2u6l7/dummy-nodejs
+  newName: public.ecr.aws/a9i2u6l7/dummy-nodejs
+  newTag: 51d3c43e4da76e433673373c6261192bce192714
