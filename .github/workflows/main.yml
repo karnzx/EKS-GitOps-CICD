@@ -43,6 +43,7 @@ jobs:
     outputs:
       image_tag: ${{ steps.build-publish.outputs.image_tag }}
       full_image: ${{ steps.build-publish.outputs.full_image }}
+      registry: ${{ steps.login-ecr.outputs.registry }}
 
     steps:
       - uses: actions/checkout@v4
@@ -101,9 +102,11 @@ jobs:
       - name: "Update Deployment Image Tag" 
         working-directory: "gitops/apps/workloads/dummy-nodejs"
         env:
-          CR_IAMGE: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME }}
+          CR_IAMGE: ${{ needs.build-and-push.outputs.registry }}/${{ env.ECR_REPO_NAME }}
+          NEW_IMAGE: ${{ needs.build-and-push.outputs.full_image }}
+          NEW_IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
         run: |
-          kustomize edit set image $CR_IAMGE=${{ needs.build-and-push.outputs.full_image }}:${{ needs.build-and-push.outputs.image_tag }}
+          kustomize edit set image ${CR_IAMGE}=${NEW_IMAGE}/${NEW_IMAGE_TAG}
 
       - name: "Push Updated Image Tag"
         run: |
