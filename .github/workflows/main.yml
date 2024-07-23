@@ -93,10 +93,6 @@ jobs:
     name: "Update Manifests"
     needs: "build-and-push"
     runs-on: "ubuntu-latest"
-    env:
-      CR_IAMGE: ${{ needs.build-and-push.outputs.registry }}/${{ env.ECR_REPO_NAME }}
-      NEW_FULL_IMAGE: ${{ needs.build-and-push.outputs.full_image }}
-      NEW_IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
     steps:
       - name: "Git checkout"
         uses: "actions/checkout@v4"
@@ -105,10 +101,15 @@ jobs:
 
       - name: "Update Deployment Image Tag" 
         working-directory: "gitops/apps/workloads/dummy-nodejs"
+        env:
+          CR_IAMGE: ${{ needs.build-and-push.outputs.registry }}/${{ env.ECR_REPO_NAME }}
+          NEW_FULL_IMAGE: ${{ needs.build-and-push.outputs.full_image }}
         run: |
           kustomize edit set image ${CR_IAMGE}=${NEW_FULL_IMAGE}
 
       - name: "Push Updated Image Tag"
+        env:
+          NEW_IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
         run: |
           git config --global user.name "karnzx"
           git config --global user.email "karnzx.noreply.github.com"
