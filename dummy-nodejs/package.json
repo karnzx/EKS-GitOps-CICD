@@ -1,0 +1,20 @@
+{
+  "name": "dummy-nodejs",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ./test/index.js"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/karnzx/EKS-GitOps-CICD.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/karnzx/EKS-GitOps-CICD/issues"
+  },
+  "homepage": "https://github.com/karnzx/EKS-GitOps-CICD#readme",
+  "description": ""
+}
