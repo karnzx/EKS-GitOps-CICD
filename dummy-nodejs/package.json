@@ -16,5 +16,8 @@
     "url": "https://github.com/karnzx/EKS-GitOps-CICD/issues"
   },
   "homepage": "https://github.com/karnzx/EKS-GitOps-CICD#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
 }
