@@ -4,3 +4,5 @@ kind: Kustomization
 resources:
 - deployment.yaml
 - service.yaml
+images:
+- name: /a9i2u6l7/dummy-nodejs
