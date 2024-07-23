@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: {{ template "guestbook.frontend.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  {{- with (mergeOverwrite (deepCopy .Values.global.deploymentAnnotations) .Values.frontend.deploymentAnnotations) }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
+  labels:
+    {{- include "guestbook.labels" (dict "context" . "component" .Values.frontend.name "name" .Values.frontend.name) | nindent 4 }}
+spec:
+  {{- with include "guestbook.strategy" (mergeOverwrite (deepCopy .Values.global.deploymentStrategy) .Values.frontend.deploymentStrategy) }}
+  strategy:
+    {{- trim . | nindent 4 }}
+  {{- end }}
+  {{- if not .Values.frontend.autoscaling.enabled }}
+  replicas: {{ .Values.frontend.replicas }}
+  {{- end }}
+  revisionHistoryLimit: {{ .Values.global.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      {{- include "guestbook.selectorLabels" (dict "context" . "name" .Values.frontend.name) | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- with (mergeOverwrite (deepCopy .Values.global.podAnnotations) .Values.frontend.podAnnotations) }}
+        {{- range $key, $value := . }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+        {{- end }}
+      labels:
+        {{- include "guestbook.labels" (dict "context" . "component" .Values.frontend.name "name" .Values.frontend.name) | nindent 8 }}
+        {{- with (mergeOverwrite (deepCopy .Values.global.podLabels) .Values.frontend.podLabels) }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.frontend.imagePullSecrets | default .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+      {{- with .Values.global.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: {{ .Values.frontend.name }}
+        image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+        imagePullPolicy: {{ default .Values.global.image.imagePullPolicy .Values.frontend.image.imagePullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.frontend.containerPorts.http }}
+          protocol: TCP
+          env:
+          - name: GET_HOSTS_FROM
+            value: dns
+        livenessProbe:
+          httpGet:
+            path: /
+            port:  http
+          initialDelaySeconds: {{ .Values.frontend.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.frontend.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.frontend.livenessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.frontend.livenessProbe.successThreshold }}
+          failureThreshold: {{ .Values.frontend.livenessProbe.failureThreshold }}
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+          initialDelaySeconds: {{ .Values.frontend.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.frontend.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.frontend.readinessProbe.timeoutSeconds }}
+          successThreshold: {{ .Values.frontend.readinessProbe.successThreshold }}
+          failureThreshold: {{ .Values.frontend.readinessProbe.failureThreshold }}
+        resources:
+          {{- toYaml .Values.frontend.resources | nindent 10 }}
+        {{- with .Values.frontend.containerSecurityContext }}
+        securityContext:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}

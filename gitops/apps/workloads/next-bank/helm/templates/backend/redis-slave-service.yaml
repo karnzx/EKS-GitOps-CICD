@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+{{- if .Values.backend.redisSlave.service.annotations }}
+  annotations:
+  {{- range $key, $value := .Values.backend.redisSlave.service.annotations }}
+    {{ $key }}: {{ $value | quote }}
+  {{- end }}
+{{- end }}
+  labels:
+    {{- include "guestbook.labels" (dict "context" . "component" .Values.backend.redisSlave.name "name" .Values.backend.redisSlave.name) | nindent 4 }}
+{{- with .Values.backend.redisSlave.service.labels }}
+{{- toYaml . | nindent 4 }}
+{{- end }}
+  name: {{ .Values.backend.redisSlave.name }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  ports:
+  - name: {{ .Values.backend.redisSlave.service.portName }}
+    protocol: TCP
+    port: {{ .Values.backend.redisSlave.service.port }}
+    targetPort: http
+  selector:
+    {{- include "guestbook.selectorLabels" (dict "context" . "name" .Values.backend.redisSlave.name) | nindent 4 }}

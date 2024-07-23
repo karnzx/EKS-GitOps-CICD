@@ -1,0 +1,345 @@
+## guestbookCloud configuration
+
+# -- Provide a name in place of Chart name
+nameOverride: ""
+# -- String to fully override `"guestbook.fullname"`
+fullnameOverride: ""
+
+## global
+global:
+  # -- Common labels for the all resources
+  additionalLabels: {}
+    # app: app-name
+
+  # -- Number of old deployment ReplicaSets to retain. The rest will be garbage collected.
+  revisionHistoryLimit: 3
+  
+  # Default image used by all components
+  image:
+    # -- If defined, a imagePullPolicy applied to all guestbook deployments
+    imagePullPolicy: IfNotPresent
+    
+  # -- Secrets with credentials to pull images from a private registry
+  # global imagePullSecrets is used if imagePullSecrets of deployment is empty 
+  imagePullSecrets: []
+  
+  # -- Annotations for the all deployed Deployments
+  deploymentAnnotations: {}
+
+  # -- Deployment strategy for the all deployed Deployments
+  deploymentStrategy: {}
+
+  # -- Annotations for the all deployed pods
+  podAnnotations: {}
+
+  # -- Labels for the all deployed pods
+  podLabels: {}
+  
+  # -- Toggle and define pod-level security context.
+  # @default -- `{}` (See [values.yaml])
+  securityContext: {}
+  #  runAsUser: 999
+  #  runAsGroup: 999
+  #  fsGroup: 999
+
+## frontend
+frontend:
+  # -- frontend name
+  name: frontend
+
+  # -- The number of frontend pods to run.
+  replicas: 3
+
+  ## frontend Horizontal Pod Autoscaler
+  autoscaling:
+    # -- Enable Horizontal Pod Autoscaler ([HPA]) for the frontend
+    enabled: false
+    # -- Minimum number of replicas for the frontend [HPA]
+    minReplicas: 1
+    # -- Maximum number of replicas for the frontend [HPA]
+    maxReplicas: 5
+    # -- Average CPU utilization percentage for the frontend [HPA]
+    targetCPUUtilizationPercentage: 50
+    # -- Average memory utilization percentage for the frontend [HPA]
+    targetMemoryUtilizationPercentage: 50
+    # -- Configures the scaling behavior of the target in both Up and Down directions.
+    behavior: {}
+      # scaleDown:
+      #  stabilizationWindowSeconds: 300
+      #  policies:
+      #   - type: Pods
+      #     value: 1
+      #     periodSeconds: 180
+      # scaleUp:
+      #   stabilizationWindowSeconds: 300
+      #   policies:
+      #   - type: Pods
+      #     value: 2
+      #     periodSeconds: 60
+    # -- Configures custom HPA metrics for the frontend
+    # Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+    metrics: []
+
+  ## frontend image
+  image:
+    # -- Repository to use for the frontend 
+    repository: "us-docker.pkg.dev/google-samples/containers/gke/gb-frontend"
+    # -- Tag to use for the frontend
+    tag: "v5"
+    # -- Image pull policy for the frontend
+    # @default -- `""` (defaults to global.image.imagePullPolicy)
+    imagePullPolicy: ""
+
+  # -- Secrets with credentials to pull images from a private registry
+  # @default -- `[] (defaults to global.imagePullSecrets)`
+  imagePullSecrets: []
+
+  # -- Annotations for the all deployed Deployments
+  deploymentAnnotations: {}
+
+  # -- Deployment strategy for the all deployed Deployments
+  deploymentStrategy: {}
+
+  # -- Annotations for the all deployed pods
+  podAnnotations: {}
+
+  # -- Labels for the all deployed pods
+  podLabels: {}
+
+  # -- Resource limits and requests for the frontend pods
+  resources: {}
+  #  limits:
+  #    cpu: 50m
+  #    memory: 128Mi
+  #  requests:
+  #    cpu: 10m
+  #    memory: 64Mi
+  
+  # frontend container ports
+  containerPorts:
+    # -- frontend container port
+    http: 80
+
+  # -- ApplicationSet controller container-level security context
+  # @default -- See [values.yaml]
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    seccompProfile:
+      type: RuntimeDefault
+
+  ## Readiness and liveness probes for default backend
+  ## Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/
+  readinessProbe:
+    # -- Minimum consecutive failures for the [probe] to be considered failed after having succeeded
+    failureThreshold: 3
+    # -- Number of seconds after the container has started before [probe] is initiated
+    initialDelaySeconds: 10
+    # -- How often (in seconds) to perform the [probe]
+    periodSeconds: 10
+    # -- Minimum consecutive successes for the [probe] to be considered successful after having failed
+    successThreshold: 1
+    # -- Number of seconds after which the [probe] times out
+    timeoutSeconds: 1
+
+  livenessProbe:
+    # -- Minimum consecutive failures for the [probe] to be considered failed after having succeeded
+    failureThreshold: 3
+    # -- Number of seconds after the container has started before [probe] is initiated
+    initialDelaySeconds: 10
+    # -- How often (in seconds) to perform the [probe]
+    periodSeconds: 10
+    # -- Minimum consecutive successes for the [probe] to be considered successful after having failed
+    successThreshold: 1
+    # -- Number of seconds after which the [probe] times out
+    timeoutSeconds: 1
+
+  ## frontend service configuration
+  service:
+    # -- frontend service annotations
+    annotations: {}
+    # -- frontend service labels
+    labels: {}
+    # -- frontend service port
+    port: 80
+    # -- frontend service port name
+    portName: http
+
+## backend
+backend:
+  # -- redis-master name
+  redisMaster:
+    name: redis-leader
+
+    # -- The number of redis-master pods to run.
+    replicas: 1
+
+    ## redis-master image
+    image:
+      # -- Repository to use for the redis-master 
+      repository: "docker.io/redis"
+      # -- Tag to use for the redis-master
+      tag: "6.0.5"
+      # -- Image pull policy for the redis-master
+      # @default -- `""` (defaults to global.image.imagePullPolicy)
+      imagePullPolicy: ""
+
+    # -- Secrets with credentials to pull images from a private registry
+    # @default -- `[] (defaults to global.imagePullSecrets)`
+    imagePullSecrets: []
+
+    # -- Annotations for the all deployed Deployments
+    deploymentAnnotations: {}
+
+    # -- Deployment strategy for the all deployed Deployments
+    deploymentStrategy: {}
+
+    # -- Annotations for the all deployed pods
+    podAnnotations: {}
+
+    # -- Labels for the all deployed pods
+    podLabels: {}
+
+    # -- Resource limits and requests for the redis-master pods
+    resources: {}
+    #  limits:
+    #    cpu: 50m
+    #    memory: 128Mi
+    #  requests:
+    #    cpu: 10m
+    #    memory: 64Mi
+    
+    # redis-master container ports
+    containerPorts:
+      # -- redis-master container port
+      http: 6379
+
+    # -- ApplicationSet controller container-level security context
+    # @default -- See [values.yaml]
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
+
+    ## redis-master service configuration
+    service:
+      # -- redis-master service annotations
+      annotations: {}
+      # -- redis-master service labels
+      labels: {}
+      # -- redis-master service port
+      port: 6379
+      # -- redis-master service port name
+      portName: http
+
+  # -- redis-slave name
+  redisSlave:
+    name: redis-follower
+
+    # -- The number of redis-slave pods to run.
+    replicas: 1
+
+    ## redis-slave image
+    image:
+      # -- Repository to use for the redis-slave 
+      repository: "us-docker.pkg.dev/google-samples/containers/gke/gb-redis-follower"
+      # -- Tag to use for the redis-slave
+      tag: "v2"
+      # -- Image pull policy for the redis-slave
+      # @default -- `""` (defaults to global.image.imagePullPolicy)
+      imagePullPolicy: ""
+
+    # -- Secrets with credentials to pull images from a private registry
+    # @default -- `[] (defaults to global.imagePullSecrets)`
+    imagePullSecrets: []
+
+    # -- Annotations for the all deployed Deployments
+    deploymentAnnotations: {}
+
+    # -- Deployment strategy for the all deployed Deployments
+    deploymentStrategy: {}
+
+    # -- Annotations for the all deployed pods
+    podAnnotations: {}
+
+    # -- Labels for the all deployed pods
+    podLabels: {}
+
+    # -- Resource limits and requests for the redis-slave pods
+    resources: {}
+    #  limits:
+    #    cpu: 50m
+    #    memory: 128Mi
+    #  requests:
+    #    cpu: 10m
+    #    memory: 64Mi
+    
+    # redis-slave container ports
+    containerPorts:
+      # -- redis-slave container port
+      http: 6379
+
+    # -- ApplicationSet controller container-level security context
+    # @default -- See [values.yaml]
+    containerSecurityContext:
+      allowPrivilegeEscalation: false
+      seccompProfile:
+        type: RuntimeDefault
+
+    ## redis-slave service configuration
+    service:
+      # -- redis-slave service annotations
+      annotations: {}
+      # -- redis-slave service labels
+      labels: {}
+      # -- redis-slave service port
+      port: 6379
+      # -- redis-slave service port name
+      portName: http
+
+ingress:
+  # -- Enable an ingress resource for the frontend
+  enabled: false
+  # -- Additional ingress annotations
+  annotations: {}
+  # -- Additional ingress labels
+  labels: {}
+  # -- Defines which ingress controller will implement the resource
+  ingressClassName: ""
+
+  # -- List of ingress hosts
+  ## frontend Ingress.
+  ## Hostnames must be provided if Ingress is enabled.
+  ## Secrets must be manually created in the namespace
+  hosts: []
+    # - guestbook.example.com
+
+  # -- List of frontend ingress paths
+  frontend:
+    paths:
+      - /
+      - /img
+    # -- Ingress path type. One of `Exact`, `Prefix` or `ImplementationSpecific`
+    pathType: Prefix
+
+  # -- List of backend ingress paths
+  backend:
+    paths:
+      - /api
+    # -- Ingress path type. One of `Exact`, `Prefix` or `ImplementationSpecific`
+    pathType: Prefix
+
+  # -- Additional ingress paths
+  extraPaths: []
+    # - path: /*
+    #   pathType: Prefix
+    #   backend:
+    #     service:
+    #       name: ssl-redirect
+    #       port:
+    #         name: use-annotation
+
+  # -- Ingress TLS configuration
+  tls: []
+    # - secretName: your-certificate-name
+    #   hosts:
+    #     - guestbook.example.com

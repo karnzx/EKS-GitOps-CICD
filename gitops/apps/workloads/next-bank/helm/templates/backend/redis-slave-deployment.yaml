@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: {{ .Values.backend.redisSlave.name }}
+  namespace: {{ .Release.Namespace | quote }}
+  {{- with (mergeOverwrite (deepCopy .Values.global.deploymentAnnotations) .Values.backend.redisSlave.deploymentAnnotations) }}
+  annotations:
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
+  labels:
+    {{- include "guestbook.labels" (dict "context" . "component" .Values.backend.redisSlave.name "name" .Values.backend.redisSlave.name) | nindent 4 }}
+spec:
+  {{- with include "guestbook.strategy" (mergeOverwrite (deepCopy .Values.global.deploymentStrategy) .Values.backend.redisSlave.deploymentStrategy) }}
+  strategy:
+    {{- trim . | nindent 4 }}
+  {{- end }}
+  replicas: {{ .Values.backend.redisSlave.replicas }}
+  revisionHistoryLimit: {{ .Values.global.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      {{- include "guestbook.selectorLabels" (dict "context" . "name" .Values.backend.redisSlave.name) | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        {{- with (mergeOverwrite (deepCopy .Values.global.podAnnotations) .Values.backend.redisSlave.podAnnotations) }}
+        {{- range $key, $value := . }}
+        {{ $key }}: {{ $value | quote }}
+        {{- end }}
+        {{- end }}
+      labels:
+        {{- include "guestbook.labels" (dict "context" . "component" .Values.backend.redisSlave.name "name" .Values.backend.redisSlave.name) | nindent 8 }}
+        {{- with (mergeOverwrite (deepCopy .Values.global.podLabels) .Values.backend.redisSlave.podLabels) }}
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.backend.redisSlave.imagePullSecrets | default .Values.backend.redisSlave.imagePullSecrets | default .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- tpl (toYaml .) $ | nindent 8 }}
+      {{- end }}
+      {{- with .Values.global.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: {{ .Values.backend.redisSlave.name }}
+        image: "{{ default .Values.backend.redisSlave.image.repository .Values.backend.redisSlave.image.repository }}:{{ default .Values.backend.redisSlave.image.tag .Values.backend.redisSlave.image.tag }}"
+        imagePullPolicy: {{ default .Values.global.image.imagePullPolicy .Values.backend.redisSlave.image.imagePullPolicy }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.backend.redisSlave.containerPorts.http }}
+          protocol: TCP
+        resources:
+          {{- toYaml .Values.backend.redisSlave.resources | nindent 10 }}
+        {{- with .Values.backend.redisSlave.containerSecurityContext }}
+        securityContext:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
