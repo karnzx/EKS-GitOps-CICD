@@ -1,0 +1,122 @@
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on pull request events but only for the "main" branch
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: "dummy-nodejs"
+
+env:
+  AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
+  AWS_REGION: ${{ vars.AWS_REGION }}
+  ECR_REPO_NAME: ${{ vars.ECR_REPO_NAME || dummy-nodejs }}
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm test
+
+  trivi-scan:
+    name: Trivi Scan
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@0.20.0
+        with:
+          scan-type: 'fs'
+          ignore-unfixed: true
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    outputs:
+      image_tag: ${{ steps.build-publish.outputs.image_tag }}
+      full_image: ${{ steps.build-publish.outputs.full_image }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/github-actions
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          registries: ${{ env.AWS_ACCOUNT_ID }}
+          mask-password: "true" # see: https://github.com/aws-actions/amazon-ecr-login#docker-credentials
+          registry-type: public
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-publish
+        shell: bash
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ env.ECR_REPO_NAME }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build "dummy-nodejs" -t "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          docker push "$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          echo "IMAGE $IMAGE_TAG is pushed to $ECR_REGISTRY/$ECR_REPOSITORY"
+          echo "image_tag=$IMAGE_TAG" 
+          echo "full_image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+  update-manifest:
+    name: "Update Manifests"
+    needs: "build-and-push"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Git checkout"
+        uses: "actions/checkout@v4"
+        with:
+          token: ${{ secrets.GH_PAT_PUSH_TOKEN }}
+
+      - name: "Update Deployment Image Tag" 
+        working-directory: "gitops/apps/workloads/dummy-nodejs"
+        env:
+          CR_IAMGE: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME }}
+        run: |
+          kustomize edit set image $CR_IAMGE=${{ needs.build-and-push.outputs.full_image }}:${{ needs.build-and-push.outputs.image_tag }}
+
+      - name: "Push Updated Image Tag"
+        run: |
+          git config --global user.name "karnzx"
+          git config --global user.email "karnzx.noreply.github.com"
+          git commit -am "[skip ci] feat: Update deployment image tag to ${{ github.sha }}"
+          git push
