@@ -34,6 +34,7 @@ jobs:
       - run: npm test
 
   build-and-push:
+    needs: test
     runs-on: ubuntu-latest
 
     permissions:
