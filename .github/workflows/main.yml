@@ -16,7 +16,7 @@ defaults:
 env:
   AWS_ACCOUNT_ID: ${{ vars.AWS_ACCOUNT_ID }}
   AWS_REGION: ${{ vars.AWS_REGION }}
-  ECR_REPO_NAME: ${{ vars.ECR_REPO_NAME || dummy-nodejs }}
+  ECR_REPO_NAME: ${{ vars.ECR_REPO_NAME || 'dummy-nodejs' }}
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
