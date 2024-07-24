@@ -2,10 +2,17 @@
 
 A repository dedicated to deploying and managing applications on AWS EKS using GitOps principles. Includes Terraform infrastructure code, ArgoCD configurations, and CI/CD pipelines.
 
-Terraform 1.8.1 on AWS Cloud provider.
+Consider these Directory as Git repository.
 
-To get Kubeconfig file run
+- Terraform
+- GitOps
+- Dummy-nodejs
 
-```shell
-aws eks update-kubeconfig --name "ProjectU" --dry-run > .kubeconfig
-```
+Terraform apply locally (Terraform State should store on cloud)
+CI/CD workflow create for dummy-nodejs
+
+## Flow
+
+Terraform provisioning infrastructure on AWS and boostraping deploy Argocd and Argocd-apps using Helm
+Argocd-app in Terraform deploy Argocd App in GitOps (using Argocd App of Apps pattern)
+dummy-nodejs deployed from kubernetes manifest duumy-nodejs in GitOps workloads.
