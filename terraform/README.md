@@ -1,7 +1,7 @@
 # Terraform
 
 Use to provisioning infrastructure such as AWS EKS, S3, RDS on AWS provider
-Terraform 1.8.1 
+Terraform 1.8.1
 
 To create
 
