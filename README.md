@@ -16,3 +16,5 @@ CI/CD workflow create for dummy-nodejs
 Terraform provisioning infrastructure on AWS and boostraping deploy Argocd and Argocd-apps using Helm
 Argocd-app in Terraform deploy Argocd App in GitOps (using Argocd App of Apps pattern)
 dummy-nodejs deployed from kubernetes manifest duumy-nodejs in GitOps workloads.
+
+![argocd applications](./images/argocd_applications.png)

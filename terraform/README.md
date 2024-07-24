@@ -24,3 +24,13 @@ make sure S3 bucket is empty, RDS delete protection is disabled then
 ```shell
 terraform destroy
 ```
+
+## Test
+
+Test AWS S3 IRSA, access AWS S3 from eks pod
+
+![test s3 irsa](../images/test_s3_irsa.png)
+
+Test connection from EKS pod to RDS
+
+![test connect eks pod to rds](../images/test_connection_eks_rds.png)
