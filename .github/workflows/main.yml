@@ -117,3 +117,16 @@ jobs:
           git commit -am "[skip ci] feat: Update deployment image tag to ${NEW_IMAGE_TAG}"
           git pull --rebase origin main
           git push origin HEAD:main
+
+  webhooks:
+    needs: update-manifest
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Print webhook"
+        run: echo "webhooks!"
+      # - name: "Sync ArgoCD"
+      #   run: "curl -X POST .../api/webhook -H 'content-type: application/json' -d {ref: '', repositoy: ''}"
+      # - name: "notification to Google chat"
+      #   run: "curl ...."
+      # - name: "notification to Slack"
+      #   run: "curl ...."
